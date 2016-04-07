@@ -15,6 +15,8 @@ class TabList
     @currentIndex = null
     @view = new TabListView(@)
     @disposable = new CompositeDisposable
+    @activating = false
+    @activeEditorCb = null
 
     @disposable.add @pane.onDidDestroy =>
       @destroy
@@ -36,7 +38,15 @@ class TabList
       @_removeTabAtIndex(index)
 
     @disposable.add @pane.observeActiveItem (item) =>
-      @_moveItemToFront(item)
+      @activeEditorCb?.dispose()
+      if @activating
+        @activating = false
+        if atom.workspace.isTextEditor(item)
+          @activeEditorCb = item.onDidStopChanging (event) =>
+            @_moveItemToFront(item)
+            @activeEditorCb?.dispose();
+      else
+        @_moveItemToFront(item)
 
     @disposable.add @pane.observeItems (item) =>
       return if !item.onDidChangeTitle
@@ -67,6 +77,7 @@ class TabList
     @tabs = []
     @disposable.dispose()
     @view.destroy()
+    @activeEditorCb?.dispose()
 
   serialize: ->
     {tabs: @tabs.map (tab) -> {title: tab.item.getTitle?() or null}}
@@ -107,9 +118,14 @@ class TabList
   _moveItemToFront: (item) ->
     index = @_findItemIndex(item)
     unless index is null
-      tabs = @tabs.splice(index, 1)
-      @tabs.unshift(tabs[0])
+      tab = @tabs.splice(index, 1)[0]
+      if @currentIndex > 0 && index != @currentIndex
+        tabs = @tabs.splice(0, @currentIndex - (index < @currentIndex) ? 1 : 0)
+        @tabs = @tabs.concat(tabs)
+      @tabs.unshift(tab)
       @view.tabsReordered()
+      @currentIndex = null
+      @view.currentTabChanged(null)
 
   _findItemIndex: (item) ->
     for tab, index in @tabs
@@ -149,17 +165,13 @@ class TabList
     if @switching
       @switching = false
       unless @currentIndex is null
-        if 0 <= @currentIndex < @tabs.length
+        if 0 <= @currentIndex < @tabs.length && @tabs[@currentIndex].item isnt @pane.getActiveItem()
+          @activating = true
           @pane.activateItem(@tabs[@currentIndex].item)
           @pane.activate()
-        @currentIndex = null
-        @view.currentTabChanged(null)
       @view.hide()
 
   cancel: ->
     if @switching
       @switching = false
-      unless @currentIndex is null
-        @currentIndex = null
-        @view.currentTabChanged(null)
     @view.hide()
