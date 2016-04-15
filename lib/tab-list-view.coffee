@@ -109,20 +109,21 @@ class TabListView
     invokeSelect = (event) =>
       if not (event.ctrlKey or event.altKey or event.shiftKey or event.metaKey)
         @tabSwitcher.select()
+        @tabSwitcher.cancel()
         unbind()
 
     invokeCancel = (event) =>
       @tabSwitcher.cancel()
       unbind()
 
-    document.addEventListener 'keyup', invokeSelect
+    #document.addEventListener 'keyup', invokeSelect
     document.addEventListener 'mouseup', invokeSelect
-    @ol.addEventListener 'blur', invokeCancel
+    #@ol.addEventListener 'blur', invokeCancel
 
     unbind = =>
-      document.removeEventListener 'keyup', invokeSelect
+      #document.removeEventListener 'keyup', invokeSelect
       document.removeEventListener 'mouseup', invokeSelect
-      @ol.removeEventListener 'blur', invokeCancel
+      #@ol.removeEventListener 'blur', invokeCancel
 
   scrollToCurrentTab: ->
     if (currentTab = @tabSwitcher.tabs[@tabSwitcher.currentIndex])

@@ -50,8 +50,13 @@ module.exports =
     @disposable = new CompositeDisposable
 
     @disposable.add atom.commands.add 'atom-workspace',
-      'tab-switcher:next': -> TabSwitcher.currentList()?.next()
-      'tab-switcher:previous': -> TabSwitcher.currentList()?.previous()
+      'tab-switcher:next': ->
+        TabSwitcher.currentList()?.next()
+        TabSwitcher.currentList()?.select()
+      'tab-switcher:previous': ->
+        TabSwitcher.currentList()?.previous()
+        TabSwitcher.currentList()?.select()
+      'tab-switcher:hide': -> TabSwitcher.currentList()?.cancel()
       'tab-switcher:save': -> TabSwitcher.currentList()?.saveCurrent()
       'tab-switcher:close': -> TabSwitcher.currentList()?.closeCurrent()
 

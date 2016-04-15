@@ -162,14 +162,12 @@ class TabList
       @view.currentTabChanged(@tabs[index])
 
   select: ->
-    if @switching
-      @switching = false
-      unless @currentIndex is null
-        if 0 <= @currentIndex < @tabs.length && @tabs[@currentIndex].item isnt @pane.getActiveItem()
-          @activating = true
-          @pane.activateItem(@tabs[@currentIndex].item)
-          @pane.activate()
-      @view.hide()
+    unless @currentIndex is null
+      if 0 <= @currentIndex < @tabs.length && @tabs[@currentIndex].item isnt @pane.getActiveItem()
+        @activating = true
+        @pane.activateItem(@tabs[@currentIndex].item)
+        @pane.activate()
+      #@view.hide()
 
   cancel: ->
     if @switching
