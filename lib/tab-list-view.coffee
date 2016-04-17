@@ -49,17 +49,17 @@ class TabListView
       className: 'tab-switcher'
     @panel = vert.parentNode
 
-    @disposable.add @ol.addEventListener 'mouseover', (event) =>
-      # Mouseover may trigger without a mouse move if the list scrolls.
-      return if not @mouseMoved(event)
-      if (li = event.target.closest('li'))
-        id = parseInt(li.getAttribute('data-id'))
-        tabSwitcher.setCurrentId(id)
-
-    @disposable.add @ol.addEventListener 'click', (event) =>
-      if (li = event.target.closest('li'))
-        id = parseInt(li.getAttribute('data-id'))
-        tabSwitcher.select(id)
+    # @disposable.add @ol.addEventListener 'mouseover', (event) =>
+    #   # Mouseover may trigger without a mouse move if the list scrolls.
+    #   return if not @mouseMoved(event)
+    #   if (li = event.target.closest('li'))
+    #     id = parseInt(li.getAttribute('data-id'))
+    #     tabSwitcher.setCurrentId(id)
+    #
+    # @disposable.add @ol.addEventListener 'click', (event) =>
+    #   if (li = event.target.closest('li'))
+    #     id = parseInt(li.getAttribute('data-id'))
+    #     tabSwitcher.select(id)
 
   mouseMoved: (event) ->
     result = @lastMouseCoords[0] != event.screenX or @lastMouseCoords[1] != event.screenY
