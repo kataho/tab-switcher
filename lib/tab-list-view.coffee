@@ -33,7 +33,7 @@ class TabListView
     @disposable = new CompositeDisposable
     @items = {}
     @currentItem = null
-    @lastMouseCoords = [null, null]
+    @lastMouseCoords = null
 
     for tab in tabSwitcher.tabs
       @items[tab.id] = @_makeItem(tab)
@@ -49,20 +49,20 @@ class TabListView
       className: 'tab-switcher'
     @panel = vert.parentNode
 
-    # @disposable.add @ol.addEventListener 'mouseover', (event) =>
-    #   # Mouseover may trigger without a mouse move if the list scrolls.
-    #   return if not @mouseMoved(event)
-    #   if (li = event.target.closest('li'))
-    #     id = parseInt(li.getAttribute('data-id'))
-    #     tabSwitcher.setCurrentId(id)
-    #
-    # @disposable.add @ol.addEventListener 'click', (event) =>
-    #   if (li = event.target.closest('li'))
-    #     id = parseInt(li.getAttribute('data-id'))
-    #     tabSwitcher.select(id)
+    @disposable.add @ol.addEventListener 'mouseover', (event) =>
+      # Mouseover may trigger without a mouse move if the list scrolls.
+      return if not @mouseMoved(event)
+      if (li = event.target.closest('li'))
+        id = parseInt(li.getAttribute('data-id'))
+        tabSwitcher.setCurrentId(id)
+
+    @disposable.add @ol.addEventListener 'click', (event) =>
+      if (li = event.target.closest('li'))
+        id = parseInt(li.getAttribute('data-id'))
+        tabSwitcher.select(id)
 
   mouseMoved: (event) ->
-    result = @lastMouseCoords[0] != event.screenX or @lastMouseCoords[1] != event.screenY
+    result = @lastMouseCoords and (@lastMouseCoords[0] != event.screenX or @lastMouseCoords[1] != event.screenY)
     @lastMouseCoords = [event.screenX, event.screenY]
     result
 
@@ -104,7 +104,9 @@ class TabListView
     panel = @ol.closest('atom-panel')
     @modalPanel.show()
     @ol.focus()
-    setTimeout => @panel.classList.add('is-visible')
+    setTimeout =>
+      @panel.classList.add('is-visible')
+      @lastMouseCoords = null
 
     invokeSelect = (event) =>
       if not (event.ctrlKey or event.altKey or event.shiftKey or event.metaKey)
