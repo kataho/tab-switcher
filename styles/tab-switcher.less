@@ -17,9 +17,13 @@ atom-panel.modal.tab-switcher {
 
   background-color: transparent;
 
+  transition-duration: 0.8s;
+  transition-timing-function: ease-in;
   opacity: 0;
 
   &.is-visible {
+    transition-duration: 0.2s;
+    transition-timing-function: ease-out;
     opacity: 1;
   }
 
@@ -45,20 +49,20 @@ ol.tab-switcher-tab-list {
   list-style: none;
 
   background-color: rgba(32, 33, 35, 0.65);
-  border-radius: 1em;
+  border-radius: 0.5em;
   font-size: 150%;
-  color: white;
-
 
   li {
-    transition: background-color 0.2s, padding 0.2s;
+    transition: padding 0.25s, background-color 0.15s;
     display: flex;
     padding: 0px 0px 0px 5px;
+    color: #eaeaea;
 
     &.current {
       background-color: #6a9de0;
-      border-radius: 0.5em;
+      border-radius: 0.24em;
       padding: 0px 5px 0px 0px;
+      color: white;
     }
 
   }

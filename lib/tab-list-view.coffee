@@ -49,6 +49,9 @@ class TabListView
       className: 'tab-switcher'
     @panel = vert.parentNode
 
+    @disposable.add @panel.addEventListener 'transitionend', (event) =>
+      @modalPanel.hide() if event.target == @panel and not event.target.classList.contains('is-visible')
+
     @disposable.add @ol.addEventListener 'mouseover', (event) =>
       # Mouseover may trigger without a mouse move if the list scrolls.
       return if not @mouseMoved(event)
@@ -135,7 +138,6 @@ class TabListView
 
   hide: ->
     @panel.classList.remove('is-visible')
-    @modalPanel.hide()
 
   _makeItem: (tab) ->
     tab.isEditor = tab.item.constructor.name == 'TextEditor'
