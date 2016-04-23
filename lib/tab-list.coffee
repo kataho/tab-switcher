@@ -38,21 +38,19 @@ class TabList
       @_removeTabAtIndex(index)
 
     @disposable.add @pane.observeActiveItem (item) =>
-<<<<<<< HEAD
       @activeEditorCb?.dispose()
       if @activating
         @activating = false
         if atom.workspace.isTextEditor(item)
+          @activeEditorCb?.dispose();
           @activeEditorCb = item.onDidStopChanging (event) =>
             @_moveItemToFront(item)
-            @activeEditorCb?.dispose();
+            if atom.config.get 'tab-switcher.reorderTabs'
+              @pane.moveItem(item, 0)
       else
         @_moveItemToFront(item)
-=======
-      @_moveItemToFront(item)
-      if atom.config.get 'tab-switcher.reorderTabs'
-        @pane.moveItem(item, 0)
->>>>>>> b28d4a27c4b5ac81c5fbf690e77fc8ea594dd7dd
+        if atom.config.get 'tab-switcher.reorderTabs'
+          @pane.moveItem(item, 0)
 
     @disposable.add @pane.observeItems (item) =>
       return if !item.onDidChangeTitle
