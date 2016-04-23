@@ -46,6 +46,10 @@ module.exports =
       default: 0.1,
       title: 'Pause before displaying tab switcher, in seconds'
       description: 'Increasing this can reduce flicker when switching quickly.'
+    reorderTabs:
+      type: 'boolean'
+      default: false
+      title: 'Reorder tabs to match the list'
 
   activate: (state) ->
     @disposable = new CompositeDisposable
