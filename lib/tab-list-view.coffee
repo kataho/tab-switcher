@@ -121,6 +121,7 @@ class TabListView
       @tabSwitcher.cancel()
       unbind()
 
+
     document.addEventListener 'keyup', invokeSelect, true
     document.addEventListener 'mouseup', invokeSelect
     #@ol.addEventListener 'blur', invokeCancel

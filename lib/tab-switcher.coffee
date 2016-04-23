@@ -57,7 +57,8 @@ module.exports =
       'tab-switcher:previous': ->
         TabSwitcher.currentList()?.previous()
         TabSwitcher.currentList()?.select()
-      'tab-switcher:hide': -> TabSwitcher.currentList()?.cancel()
+      'tab-switcher:select': -> TabSwitcher.currentList()?.select()
+      'tab-switcher:cancel': -> TabSwitcher.currentList()?.cancel()
       'tab-switcher:save': -> TabSwitcher.currentList()?.saveCurrent()
       'tab-switcher:close': -> TabSwitcher.currentList()?.closeCurrent()
 
