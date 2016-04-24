@@ -34,6 +34,8 @@ class TabListView
     @items = {}
     @currentItem = null
     @lastMouseCoords = null
+    @delay = 0
+    @delayTimer = null
 
     for tab in tabSwitcher.tabs
       @items[tab.id] = @_makeItem(tab)
@@ -70,10 +72,7 @@ class TabListView
     result
 
   updateAnimationDelay: (delay) ->
-    if delay == 0
-      @panel.style.transitionDelay = ''
-    else
-      @panel.style.transitionDelay = "#{delay}s"
+    @delay = delay
 
   tabAdded: (tab) ->
     @items[tab.id] = @_makeItem(tab)
@@ -104,12 +103,11 @@ class TabListView
 
   show: ->
     @scrollToCurrentTab()
-    panel = @ol.closest('atom-panel')
-    @modalPanel.show()
-    @ol.focus()
-    setTimeout =>
-      @panel.classList.add('is-visible')
-      @lastMouseCoords = null
+    @lastMouseCoords = null
+    @delayTimer = setTimeout( =>
+      @modalPanel.show()
+      setTimeout => @panel.classList.add('is-visible')
+    @delay * 1000)
 
     invokeSelect = (event) =>
       if not (event.ctrlKey or event.altKey or event.shiftKey or event.metaKey)
@@ -120,7 +118,6 @@ class TabListView
     invokeCancel = (event) =>
       @tabSwitcher.cancel()
       unbind()
-
 
     document.addEventListener 'keyup', invokeSelect, true
     document.addEventListener 'mouseup', invokeSelect
@@ -138,6 +135,7 @@ class TabListView
       @ol.scrollTop = Math.max(offset, 0)
 
   hide: ->
+    clearTimeout @delayTimer
     @panel.classList.remove('is-visible')
 
   _makeItem: (tab) ->
