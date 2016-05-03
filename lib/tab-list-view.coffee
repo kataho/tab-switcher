@@ -34,6 +34,8 @@ class TabListView
     @items = {}
     @currentItem = null
     @lastMouseCoords = [null, null]
+    @delay = 0
+    @delayTimer = null
 
     for tab in tabSwitcher.tabs
       @items[tab.id] = @_makeItem(tab)
@@ -48,6 +50,9 @@ class TabListView
       visible: false
       className: 'tab-switcher'
     @panel = vert.parentNode
+
+    @disposable.add @panel.addEventListener 'transitionend', (event) =>
+      @modalPanel.hide() if event.target == @panel and not event.target.classList.contains('is-visible')
 
     @disposable.add @ol.addEventListener 'mouseover', (event) =>
       # Mouseover may trigger without a mouse move if the list scrolls.
@@ -67,10 +72,7 @@ class TabListView
     result
 
   updateAnimationDelay: (delay) ->
-    if delay == 0
-      @panel.style.transitionDelay = ''
-    else
-      @panel.style.transitionDelay = "#{delay}s"
+    @delay = delay
 
   tabAdded: (tab) ->
     @items[tab.id] = @_makeItem(tab)
@@ -101,10 +103,11 @@ class TabListView
 
   show: ->
     @scrollToCurrentTab()
-    panel = @ol.closest('atom-panel')
-    @modalPanel.show()
-    @ol.focus()
-    setTimeout => @panel.classList.add('is-visible')
+    @delayTimer = setTimeout( =>
+      @modalPanel.show()
+      @ol.focus()
+      @delayTimer = setTimeout => @panel.classList.add('is-visible')
+    @delay * 1000)
 
     invokeSelect = (event) =>
       if not (event.ctrlKey or event.altKey or event.shiftKey or event.metaKey)
@@ -130,7 +133,7 @@ class TabListView
 
   hide: ->
     @panel.classList.remove('is-visible')
-    @modalPanel.hide()
+    clearTimeout @delayTimer
 
   _makeItem: (tab) ->
     tab.isEditor = tab.item.constructor.name == 'TextEditor'
