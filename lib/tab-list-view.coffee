@@ -132,8 +132,11 @@ class TabListView
       @ol.scrollTop = Math.max(offset, 0)
 
   hide: ->
-    @panel.classList.remove('is-visible')
     clearTimeout @delayTimer
+    if @panel.classList.contains('is-visible')
+      @panel.classList.remove('is-visible')
+    else
+      @modalPanel.hide()
 
   _makeItem: (tab) ->
     tab.isEditor = tab.item.constructor.name == 'TextEditor'
