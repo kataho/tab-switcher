@@ -15,6 +15,7 @@ class TabList
     @currentIndex = null
     @view = new TabListView(@)
     @disposable = new CompositeDisposable
+    @activating = false
 
     @disposable.add @pane.onDidDestroy =>
       @destroy
@@ -36,9 +37,10 @@ class TabList
       @_removeTabAtIndex(index)
 
     @disposable.add @pane.observeActiveItem (item) =>
-      @_moveItemToFront(item)
-      if atom.config.get 'tab-switcher.reorderTabs'
-        @pane.moveItem(item, 0)
+      if @activating
+        @activating = false
+      else
+        @_moveItemToFront(item)
 
     @disposable.add @pane.observeItems (item) =>
       return if !item.onDidChangeTitle
@@ -81,6 +83,7 @@ class TabList
       index -= @tabs.length if index >= @tabs.length
       @_setCurrentIndex(index)
     @_start()
+    @_activate()
 
   previous: ->
     if @tabs.length == 0
@@ -90,6 +93,7 @@ class TabList
       index += @tabs.length if index < 0
       @_setCurrentIndex(index)
     @_start()
+    @_activate()
 
   setCurrentId: (id) ->
     index = @tabs.map((tab) -> tab.id).indexOf(id)
@@ -112,6 +116,8 @@ class TabList
       tabs = @tabs.splice(index, 1)
       @tabs.unshift(tabs[0])
       @view.tabsReordered()
+    @currentIndex = null
+    @view.currentTabChanged(null)
 
   _findItemIndex: (item) ->
     for tab, index in @tabs
@@ -147,21 +153,18 @@ class TabList
       @currentIndex = index
       @view.currentTabChanged(@tabs[index])
 
+  _activate: ->
+    unless @currentIndex is null
+      if 0 <= @currentIndex < @tabs.length && @tabs[@currentIndex].item isnt @pane.getActiveItem()
+        @activating = true
+        @pane.activateItem(@tabs[@currentIndex].item)
+        @pane.activate()
+
   select: ->
-    if @switching
-      @switching = false
-      unless @currentIndex is null
-        if 0 <= @currentIndex < @tabs.length
-          @pane.activateItem(@tabs[@currentIndex].item)
-          @pane.activate()
-        @currentIndex = null
-        @view.currentTabChanged(null)
-      @view.hide()
+    @_moveItemToFront(@pane.getActiveItem())
+    @cancel()
 
   cancel: ->
     if @switching
       @switching = false
-      unless @currentIndex is null
-        @currentIndex = null
-        @view.currentTabChanged(null)
     @view.hide()
