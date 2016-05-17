@@ -11,6 +11,7 @@ TabSwitcher =
     tabList = @tabLists[pane.id]
     if tabList is undefined
       @tabLists[pane.id] = tabList = new TabList(pane)
+      tabList.updateAnimationDelay(atom.config.get('tab-switcher.fadeInDelay'))
       pane.onDidDestroy =>
         delete @tabLists[pane.id]
 
