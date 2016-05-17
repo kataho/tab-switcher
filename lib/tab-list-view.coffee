@@ -132,7 +132,9 @@ class TabListView
       @ol.scrollTop = Math.max(offset, 0)
 
   hide: ->
+    return if @delayTimer == null
     clearTimeout @delayTimer
+    @delayTimer = null
     if @panel.classList.contains('is-visible')
       @panel.classList.remove('is-visible')
     else
