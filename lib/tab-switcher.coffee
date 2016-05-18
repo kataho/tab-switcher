@@ -50,6 +50,10 @@ module.exports =
       type: 'boolean'
       default: false
       title: 'Reorder tabs to match the list'
+    immediateSwitch:
+      type: 'boolean'
+      default: false
+      title: 'Switch tab item immediately'
 
   activate: (state) ->
     @disposable = new CompositeDisposable

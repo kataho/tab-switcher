@@ -111,10 +111,17 @@ class TabListView
         @tabSwitcher.select()
         unbind()
 
+    invokeCancel = (event) =>
+      if not atom.config.get('tab-switcher.immediateSwitch')
+        @tabSwitcher.cancel()
+        unbind()
+
     document.addEventListener 'mouseup', invokeSelect
+    @ol.addEventListener 'blur', invokeCancel
 
     unbind = =>
       document.removeEventListener 'mouseup', invokeSelect
+      @ol.removeEventListener 'blur', invokeCancel
 
   scrollToCurrentTab: ->
     if (currentTab = @tabSwitcher.tabs[@tabSwitcher.currentIndex])
