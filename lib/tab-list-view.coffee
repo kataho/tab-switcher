@@ -103,7 +103,6 @@ class TabListView
     @scrollToCurrentTab()
     panel = @ol.closest('atom-panel')
     @modalPanel.show()
-    @ol.focus()
     setTimeout => @panel.classList.add('is-visible')
 
     invokeSelect = (event) =>
