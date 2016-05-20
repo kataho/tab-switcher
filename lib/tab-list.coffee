@@ -15,7 +15,7 @@ class TabList
     @currentIndex = null
     @view = new TabListView(@)
     @disposable = new CompositeDisposable
-    @cancelReorderOnce = false
+    @enableActiveItemObservation = true
 
     @disposable.add @pane.onDidDestroy =>
       @destroy
@@ -37,7 +37,7 @@ class TabList
       @_removeTabAtIndex(index)
 
     @disposable.add @pane.observeActiveItem (item) =>
-      @_moveItemToFront(item)
+      @_moveItemToFront(item) if @enableActiveItemObservation
 
     @disposable.add @pane.observeItems (item) =>
       return if !item.onDidChangeTitle
@@ -80,7 +80,7 @@ class TabList
       index -= @tabs.length if index >= @tabs.length
       @_setCurrentIndex(index)
     @_start()
-    @_activate(true) if atom.config.get('tab-switcher.immediateSwitch')
+    @_activate() if atom.config.get('tab-switcher.immediateSwitch')
 
   previous: ->
     if @tabs.length == 0
@@ -90,7 +90,7 @@ class TabList
       index += @tabs.length if index < 0
       @_setCurrentIndex(index)
     @_start()
-    @_activate(true) if atom.config.get('tab-switcher.immediateSwitch')
+    @_activate() if atom.config.get('tab-switcher.immediateSwitch')
 
   setCurrentId: (id) ->
     index = @tabs.map((tab) -> tab.id).indexOf(id)
@@ -108,17 +108,12 @@ class TabList
     @pane.removeItem(tab.item)
 
   _moveItemToFront: (item) ->
-    if @cancelReorderOnce
-      @cancelReorderOnce = false
-      return
-    if atom.config.get 'tab-switcher.reorderTabs'
-      @pane.moveItem(item, 0)
     index = @_findItemIndex(item)
     unless index is null
       tabs = @tabs.splice(index, 1)
       @tabs.unshift(tabs[0])
       @view.tabsReordered()
-
+    @pane.moveItem(item, 0) if atom.config.get 'tab-switcher.reorderTabs'
 
   _findItemIndex: (item) ->
     for tab, index in @tabs
@@ -154,24 +149,24 @@ class TabList
       @currentIndex = index
       @view.currentTabChanged(@tabs[index])
 
-  _activate: (cancelReorder) ->
+  _activate: ->
     unless @currentIndex is null
       if 0 <= @currentIndex < @tabs.length
-        if @tabs[@currentIndex].item isnt @pane.getActiveItem()
-          @cancelReorderOnce = cancelReorder
-          @pane.activateItem(@tabs[@currentIndex].item)
-          @pane.activate()
-        else if cancelReorder == false
-          @_moveItemToFront @pane.getActiveItem()
+        @enableActiveItemObservation = false
+        @pane.activateItem(@tabs[@currentIndex].item)
+        @enableActiveItemObservation = true
+        @pane.activate()
 
   select: ->
-    @_activate(false)
-    @cancel()
+    if @switching
+      @_activate()
+      @_moveItemToFront @pane.getActiveItem()
+      @cancel()
 
   cancel: ->
     if @switching
       @switching = false
-    unless @currentIndex is null
-      @currentIndex = null
-      @view.currentTabChanged(null)
+      unless @currentIndex is null
+        @currentIndex = null
+        @view.currentTabChanged(null)
     @view.hide()
